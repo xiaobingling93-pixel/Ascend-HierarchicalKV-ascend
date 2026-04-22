@@ -58,7 +58,7 @@ inline uint64_t Murmur3HashHost(const uint64_t& key) {
 }
 
 #if defined(__CCE__)
-__inline__ __device__ uint64_t Murmur3HashDevice(uint64_t const& key) {
+__inline__ __simt_callee__ uint64_t Murmur3HashDevice(uint64_t const& key) {
   uint64_t k = key;
   k ^= k >> 33;
   k *= UINT64_C(0xff51afd7ed558ccd);
@@ -82,7 +82,7 @@ __inline__ __device__ uint64_t Murmur3HashDevice(uint64_t const& key) {
  * 4. t = ((x - q) >> 1) + q
  * 5. r = t >> (shift - 1)
  */
-__inline__ __device__ uint64_t get_global_idx(
+__inline__ __simt_callee__ uint64_t get_global_idx(
     const uint64_t& hashed_key, const uint64_t& capacity_divisor_magic,
     const uint64_t& capacity_divisor_shift, const uint64_t& capacity) {
 #ifdef FORBID_QUICK_DIV
@@ -136,7 +136,7 @@ static inline bool is_on_device(const void* ptr) {
 
 #if defined(__CCE__)
 template <typename T>
-__forceinline__ __device__ T ldg_l2nc_l1c(__gm__ T* ptr) {
+__forceinline__ __simt_callee__ T ldg_l2nc_l1c(__gm__ T* ptr) {
   return __ldg<LD_L2CacheType::L2_CACHE_HINT_NOTALLOC_CLEAN, L1CacheType::CACHEABLE>(ptr);
 }
 #endif

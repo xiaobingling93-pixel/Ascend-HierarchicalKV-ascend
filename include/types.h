@@ -89,12 +89,12 @@ constexpr int MAX_RESERVED_KEY_BIT = 62;
 constexpr uint32_t WARP_SIZE = 32;
 
 template <typename K>
-__forceinline__ __device__ D empty_digest() {
+__forceinline__ __simt_callee__ D empty_digest() {
   const K hashed_key = Murmur3HashDevice(static_cast<K>(EMPTY_KEY));
   return static_cast<D>(hashed_key >> 32);
 }
 
-__forceinline__ __device__ uint32_t vcmpeq4(uint32_t a, uint32_t b) {
+__forceinline__ __simt_callee__ uint32_t vcmpeq4(uint32_t a, uint32_t b) {
   uint32_t eq = ~(a ^ b);
   uint32_t mask0 = ((eq >> 0) & 0xFF) == 0xFF ? 0x000000FF : 0;
   uint32_t mask1 = ((eq >> 8) & 0xFF) == 0xFF ? 0x0000FF00 : 0;
@@ -105,20 +105,20 @@ __forceinline__ __device__ uint32_t vcmpeq4(uint32_t a, uint32_t b) {
 }
 
 template <typename K>
-__forceinline__ __device__ D get_digest(const K& key) {
+__forceinline__ __simt_callee__ D get_digest(const K& key) {
   const K hashed_key = Murmur3HashDevice(key);
   return static_cast<D>(hashed_key >> 32);
 }
 
 template <typename K>
-__forceinline__ __device__ VecD_Comp digests_from_hashed(const K& hashed_key) {
+__forceinline__ __simt_callee__ VecD_Comp digests_from_hashed(const K& hashed_key) {
   D digest = static_cast<D>(hashed_key >> 32);
   // Set every byte in VecD_Comp to `digest`.
   return static_cast<VecD_Comp>(digest) * 0x01010101U;
 }
 
 template <typename K>
-__forceinline__ __device__ VecD_Comp empty_digests() {
+__forceinline__ __simt_callee__ VecD_Comp empty_digests() {
   D digest = empty_digest<K>();
   // Set every byte in VecD_Comp to `digest`.
   return static_cast<VecD_Comp>(digest) * 0x01010101U;
@@ -126,12 +126,12 @@ __forceinline__ __device__ VecD_Comp empty_digests() {
 
 // Position alignment.
 template <uint32_t ALIGN_SIZE>
-__forceinline__ __device__ uint32_t align_to(uint32_t& pos) {
+__forceinline__ __simt_callee__ uint32_t align_to(uint32_t& pos) {
   constexpr uint32_t MASK = 0xffffffffU - (ALIGN_SIZE - 1);
   return pos & MASK;
 }
 
-__forceinline__ __device__ uint32_t get_start_position(
+__forceinline__ __simt_callee__ uint32_t get_start_position(
     const uint64_t& global_idx, const uint64_t& bucket_capacity) {
   uint32_t start_idx = global_idx & (bucket_capacity - 1);
   start_idx -= start_idx % 4;
@@ -140,7 +140,7 @@ __forceinline__ __device__ uint32_t get_start_position(
 
 #if defined(__CCE__)
 template <class K>
-__aicore__ inline bool IS_RESERVED_KEY(K key) {
+__simt_callee__ inline bool IS_RESERVED_KEY(K key) {
   return (RESERVED_KEY_MASK_1 & key) == RESERVED_KEY_MASK_2;
 }
 #endif
@@ -171,29 +171,29 @@ struct Bucket {
 
   D* digests(int index) const { return digests_ + index; }
 
-  __gm__ __forceinline__ __device__ K* keys(int index) const {
+  __gm__ __forceinline__ __simt_callee__ K* keys(int index) const {
     return keys_ + index;
   }
 
-  __gm__ __forceinline__ __device__ S* scores(int index) const {
+  __gm__ __forceinline__ __simt_callee__ S* scores(int index) const {
     return scores_ + index;
   }
 
   K** keys_addr() { return reinterpret_cast<K**>(&keys_); }
 
-  static __forceinline__ __device__ __gm__ K* keys(__gm__ K* keys,
+  static __forceinline__ __simt_callee__ __gm__ K* keys(__gm__ K* keys,
                                                    uint32_t offset) {
     return reinterpret_cast<__gm__ K*>(keys) + offset;
   }
 
-  static __forceinline__ __device__ __gm__ D* digests(__gm__ K* keys,
+  static __forceinline__ __simt_callee__ __gm__ D* digests(__gm__ K* keys,
                                                       uint32_t bucket_capacity,
                                                       uint32_t offset) {
     bucket_capacity = bucket_capacity > 128U ? bucket_capacity : 128U;
     return reinterpret_cast<__gm__ D*>(keys) - bucket_capacity + offset;
   }
 
-  static __forceinline__ __device__ __gm__ S* scores(__gm__ K* keys,
+  static __forceinline__ __simt_callee__ __gm__ S* scores(__gm__ K* keys,
                                                      uint32_t bucket_capacity,
                                                      uint32_t offset) {
     return reinterpret_cast<__gm__ S*>(keys + bucket_capacity) + offset;
@@ -205,7 +205,7 @@ class Lock {
   mutable T _lock;
 
  public:
-  __device__ Lock() : _lock{1} {}
+  __simt_callee__ Lock() : _lock{1} {}
 };
 
 using Mutex = Lock<>;

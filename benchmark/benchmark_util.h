@@ -168,7 +168,7 @@ void init_value_using_key(K* h_keys, V* h_vectors, const size_t key_num_per_op,
 
 template <class K, class S>
 struct ExportIfPredFunctor {
-  __forceinline__ __device__ bool operator()(const K& key, S& score,
+  __forceinline__ __simt_callee__ bool operator()(const K& key, S& score,
                                              const K& pattern,
                                              const S& threshold) {
     return score > threshold;

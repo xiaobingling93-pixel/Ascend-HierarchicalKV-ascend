@@ -130,7 +130,7 @@ struct ValueMoveOpt {
  *    ```
  *    template <class K, class S>
  *    struct EraseIfPredFunctor {
- *      __forceinline__ __device__ bool operator()(const K& key,
+ *      __forceinline__ __simt_callee__ bool operator()(const K& key,
  *                                                 S& score,
  *                                                 const K& pattern,
  *                                                 const S& threshold) {
@@ -144,7 +144,7 @@ struct ValueMoveOpt {
  *    ```
  *    template <class K, class S>
  *    struct ExportIfPredFunctor {
- *      __forceinline__ __device__ bool operator()(const K& key,
+ *      __forceinline__ __simt_callee__ bool operator()(const K& key,
  *                                                 S& score,
  *                                                 const K& pattern,
  *                                                 const S& threshold) {
@@ -1802,7 +1802,7 @@ class HashTable : public HashTableBase<K, V, S> {
    *    ```
    *    template <class K, class S>
    *    struct EraseIfPredFunctor {
-   *      __forceinline__ __device__ bool operator()(const K& key,
+   *      __forceinline__ __simt_callee__ bool operator()(const K& key,
    *                                                 S& score,
    *                                                 const K& pattern,
    *                                                 const S& threshold) {
@@ -1831,7 +1831,7 @@ class HashTable : public HashTableBase<K, V, S> {
   /**
    * @brief Erase the key-value-score tuples which match @tparam PredFunctor.
    * @param pred A functor with template <K, V, S> defined an operator with
-   * signature:  __device__ (bool*)(const K&, const V*, const S&, const
+   * signature:  __simt_callee__ (bool*)(const K&, const V*, const S&, const
    * cg::thread_block_tile<GroupSize>&).
    *  @param stream The CANN stream that is used to execute the operation.
    *
@@ -1931,7 +1931,7 @@ class HashTable : public HashTableBase<K, V, S> {
    * @brief Exports a certain number of the key-value-score tuples which match
    *
    * @tparam PredFunctor A functor with template <K, S> defined an operator
-   * with signature:  __device__ (bool*)(const K&, S&, const K&, const S&).
+   * with signature:  __simt_callee__ (bool*)(const K&, S&, const K&, const S&).
    * specified condition from the hash table.
    *
    * @param n The maximum number of exported pairs.
@@ -1941,7 +1941,7 @@ class HashTable : public HashTableBase<K, V, S> {
    *    ```
    *    template <class K, class S>
    *    struct ExportIfPredFunctor {
-   *      __forceinline__ __device__ bool operator()(const K& key,
+   *      __forceinline__ __simt_callee__ bool operator()(const K& key,
    *                                                 S& score,
    *                                                 const K& pattern,
    *                                                 const S& threshold) {
@@ -1990,7 +1990,7 @@ class HashTable : public HashTableBase<K, V, S> {
    *
    * @tparam PredFunctor A functor type with a template signature `<K, V, S>`.
    * It should define an operator with the signature:
-   * `__device__ bool operator()(const K&, const V*, const S&,
+   * `__simt_callee__ bool operator()(const K&, const V*, const S&,
    * cg::thread_block_tile<GroupSize>&)`.
    *
    * @param pred A functor of type `PredFunctor` that defines the predicate for
@@ -2030,7 +2030,7 @@ class HashTable : public HashTableBase<K, V, S> {
    *
    * @tparam ExecutionFunc A functor type with a template signature `<K, V, S>`.
    * It should define an operator with the signature:
-   * `__device__ void operator()(const K&, V*, S*,
+   * `__simt_callee__ void operator()(const K&, V*, S*,
    * cg::thread_block_tile<GroupSize>&)`.
    *
    * @param first The first element to which the function object will be
@@ -2038,7 +2038,7 @@ class HashTable : public HashTableBase<K, V, S> {
    * @param last The last element(excluding) to which the function object will
    * be applied.
    * @param f A functor of type `ExecutionFunc` that defines the predicate for
-   * filtering tuples. signature:  __device__ (bool*)(const K&, const V*, const
+   * filtering tuples. signature:  __simt_callee__ (bool*)(const K&, const V*, const
    * S&, const cg::tiled_partition<GroupSize>&).
    * @param stream The CANN stream that is used to execute the operation.
    *

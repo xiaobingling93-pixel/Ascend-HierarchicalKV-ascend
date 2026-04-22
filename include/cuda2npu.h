@@ -19,6 +19,7 @@
 #if defined(__CCE__)
 #define __device__ __aicore__
 #else
+#define __simt_callee__ 
 #define __gm__
 #define __forceinline__ inline
 #define __device__
